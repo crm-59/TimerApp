@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer App</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+    padding: 24px 16px 48px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px 52px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    width: fit-content;
+    min-width: 360px;
+    max-width: 90vw;
+    transition: width 0.3s ease;
+  }
+
+  .date {
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+
+  .local-time {
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 28px;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 -8px 24px;
+  }
+
+  .label {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 12px;
+  }
+
+  .stopwatch {
+    font-size: 4rem;
+    font-weight: 200;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    color: #e0f0ff;
+    margin-bottom: 36px;
+    text-shadow: 0 0 30px rgba(100,180,255,0.3);
+  }
+
+  .controls {
+    display: inline-flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-bottom: 28px;
+    white-space: nowrap;
+  }
+
+  button {
+    padding: 11px 22px;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+  }
+
+  button:active { transform: scale(0.96); }
+
+  .btn-start {
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(67,206,162,0.35);
+  }
+
+  .btn-stop {
+    background: linear-gradient(135deg, #f7971e, #e74c3c);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(231,76,60,0.35);
+  }
+
+  .btn-pause {
+    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+    color: #1a1a2e;
+    box-shadow: 0 4px 20px rgba(161,140,209,0.35);
+  }
+
+  .btn-reset {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  button:disabled { opacity: 0.35; cursor: default; }
+  button:not(:disabled):hover { box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+
+  .location-block { padding-top: 4px; }
+
+  .location-flag { margin-bottom: 6px; line-height: 1; }
+
+  .location-flag img {
+    width: 48px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .location-flag span { font-size: 2.2rem; }
+
+  .location-city {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .location-coords {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .location-error {
+    font-size: 0.82rem;
+    color: rgba(255,120,120,0.75);
+    margin-top: 6px;
+  }
+
+  footer {
+    margin-top: 28px;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  footer span { color: rgba(255,255,255,0.45); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- 1. Date & Time -->
+  <div class="date" id="date"></div>
+  <div class="local-time" id="localTime"></div>
+  <div class="divider"></div>
+
+  <!-- 2. Stopwatch -->
+  <div class="label">Stopwatch</div>
+  <div class="stopwatch" id="stopwatch">00:00:00</div>
+  <div class="controls">
+    <button class="btn-start" id="startBtn" onclick="startTimer()">Start</button>
+    <button class="btn-stop" id="stopBtn" onclick="stopTimer()" disabled>Stop</button>
+    <button class="btn-pause" id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
+    <button class="btn-reset" onclick="resetTimer()">Reset</button>
+  </div>
+  <div class="divider"></div>
+
+  <!-- 3. Location -->
+  <div class="location-block">
+    <div class="location-flag" id="locFlag"><span>🌐</span></div>
+    <div class="location-city" id="locCity">Detecting location…</div>
+    <div class="location-coords" id="locCoords"></div>
+    <div class="location-error" id="locError"></div>
+  </div>
+
+</div>
+
+<footer>Engineered by <span>Carlos Martinez</span> using <span>Claude</span></footer>
+
+<script>
+  // ── Clock ──────────────────────────────────────────────
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    document.getElementById('localTime').textContent = now.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Location ───────────────────────────────────────────
+  function showLocationError(msg) {
+    document.getElementById('locFlag').innerHTML = '<span>🌐</span>';
+    document.getElementById('locCity').textContent = 'Location unavailable';
+    document.getElementById('locError').textContent = msg;
+  }
+
+  function renderLocation(lat, lon, code, city, country) {
+    const latF = parseFloat(lat).toFixed(5);
+    const lonF = parseFloat(lon).toFixed(5);
+    const c = (code || '').toLowerCase();
+    document.getElementById('locCoords').textContent =
+      `${Math.abs(latF)}° ${latF >= 0 ? 'N' : 'S'}  /  ${Math.abs(lonF)}° ${lonF >= 0 ? 'E' : 'W'}`;
+    document.getElementById('locFlag').innerHTML = c
+      ? `<img src="https://flagcdn.com/w80/${c}.png" alt="${country} flag" title="${country}">`
+      : '<span>🌐</span>';
+    document.getElementById('locCity').textContent =
+      `${city || 'Unknown city'}, ${country || 'Unknown country'}`;
+  }
+
+  async function reverseGeocode(lat, lon) {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const d = await r.json();
+    const addr = d.address || {};
+    return {
+      city: addr.city || addr.town || addr.village || addr.county || 'Unknown city',
+      country: addr.country || 'Unknown country',
+      code: addr.country_code || ''
+    };
+  }
+
+  async function ipFallback() {
+    const services = [
+      async () => {
+        const r = await fetch('https://ipapi.co/json/');
+        const d = await r.json();
+        if (d.error) throw new Error(d.reason);
+        return { lat: d.latitude, lon: d.longitude, code: d.country_code, city: d.city, country: d.country_name };
+      },
+      async () => {
+        const r = await fetch('https://ip-api.com/json/?fields=status,city,country,countryCode,lat,lon');
+        const d = await r.json();
+        if (d.status !== 'success') throw new Error('failed');
+        return { lat: d.lat, lon: d.lon, code: d.countryCode, city: d.city, country: d.country };
+      },
+      async () => {
+        const r = await fetch('https://freeipapi.com/api/json');
+        const d = await r.json();
+        return { lat: d.latitude, lon: d.longitude, code: d.countryCode, city: d.cityName, country: d.countryName };
+      },
+      async () => {
+        const r = await fetch('https://ipwho.is/');
+        const d = await r.json();
+        if (!d.success) throw new Error('failed');
+        return { lat: d.latitude, lon: d.longitude, code: d.country_code, city: d.city, country: d.country };
+      }
+    ];
+    for (const svc of services) {
+      try {
+        const { lat, lon, code, city, country } = await svc();
+        renderLocation(lat, lon, code, city, country);
+        return;
+      } catch { /* try next */ }
+    }
+    showLocationError('Location could not be determined.');
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        try {
+          const { city, country, code } = await reverseGeocode(lat, lon);
+          renderLocation(lat, lon, code, city, country);
+        } catch {
+          renderLocation(lat, lon, '', 'Unknown city', 'Unknown country');
+        }
+      },
+      () => ipFallback(),
+      { timeout: 8000 }
+    );
+  } else {
+    ipFallback();
+  }
+
+  // ── Stopwatch ──────────────────────────────────────────
+  let elapsed = 0, interval = null, running = false, paused = false;
+
+  function formatElapsed(ms) {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  function startTimer() {
+    if (running) return;
+    running = true; paused = false;
+    const startTime = Date.now() - elapsed;
+    interval = setInterval(() => {
+      elapsed = Date.now() - startTime;
+      document.getElementById('stopwatch').textContent = formatElapsed(elapsed);
+    }, 100);
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = 'Pause';
+  }
+
+  function stopTimer() {
+    if (!running && !paused) return;
+    running = false; paused = false;
+    clearInterval(interval);
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = 'Pause';
+  }
+
+  function togglePause() {
+    if (running) {
+      running = false; paused = true;
+      clearInterval(interval);
+      document.getElementById('pauseBtn').textContent = 'Resume';
+    } else if (paused) {
+      paused = false; running = true;
+      const startTime = Date.now() - elapsed;
+      interval = setInterval(() => {
+        elapsed = Date.now() - startTime;
+        document.getElementById('stopwatch').textContent = formatElapsed(elapsed);
+      }, 100);
+      document.getElementById('pauseBtn').textContent = 'Pause';
+    }
+  }
+
+  function resetTimer() {
+    running = false; paused = false;
+    clearInterval(interval);
+    elapsed = 0;
+    document.getElementById('stopwatch').textContent = '00:00:00';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = 'Pause';
+  }
+</script>
+</body>
+</html>
