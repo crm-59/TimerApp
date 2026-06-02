@@ -3,9 +3,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Timer App</title>
 <style>
+  :root {
+    --bg1: #1a1a2e;
+    --bg2: #16213e;
+    --bg3: #0f3460;
+    --glass: rgba(255,255,255,0.05);
+    --border: rgba(255,255,255,0.1);
+    --text: #fff;
+    --dim: rgba(255,255,255,0.5);
+    --dimmer: rgba(255,255,255,0.35);
+    --dimmest: rgba(255,255,255,0.25);
+    --accent-sw: #64b4ff;
+    --accent-cd: #ffb347;
+    --rad: 24px;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -14,180 +29,426 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-    font-family: 'Segoe UI', sans-serif;
-    color: #fff;
-    padding: 24px 16px 48px;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    padding: 20px 16px 40px;
   }
 
+  /* ── Card ── */
   .card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 40px 52px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: var(--rad);
+    padding: clamp(24px, 5vw, 44px) clamp(20px, 6vw, 52px);
     text-align: center;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
     box-shadow: 0 24px 60px rgba(0,0,0,0.4);
-    width: fit-content;
-    min-width: 360px;
-    max-width: 90vw;
-    transition: width 0.3s ease;
+    width: 100%;
+    max-width: 480px;
+    transition: box-shadow 0.3s;
   }
 
+  /* ── Clock ── */
   .date {
-    font-size: 1rem;
+    font-size: clamp(0.7rem, 2.5vw, 0.95rem);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 6px;
+    color: var(--dim);
+    margin-bottom: 4px;
   }
 
   .local-time {
-    font-size: 2.4rem;
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
     font-weight: 300;
     letter-spacing: 0.06em;
     color: rgba(255,255,255,0.85);
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
 
   .divider {
     height: 1px;
-    background: rgba(255,255,255,0.1);
-    margin: 0 -8px 24px;
+    background: var(--border);
+    margin: 0 -8px 20px;
   }
 
+  /* ── Mode Toggle ── */
+  .mode-toggle {
+    display: inline-flex;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 4px;
+    margin-bottom: 20px;
+    gap: 2px;
+  }
+
+  .mode-btn {
+    padding: 7px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    color: var(--dimmer);
+    background: transparent;
+    transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+  }
+
+  .mode-btn.active-sw {
+    background: linear-gradient(135deg, #1e88e5, #0d47a1);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(30,136,229,0.4);
+  }
+
+  .mode-btn.active-cd {
+    background: linear-gradient(135deg, #f7971e, #e74c3c);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(231,76,60,0.4);
+  }
+
+  /* ── Label ── */
   .label {
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 12px;
+    color: var(--dimmer);
+    margin-bottom: 10px;
+    transition: color 0.3s;
   }
 
-  .stopwatch {
-    font-size: 4rem;
+  /* ── Display ── */
+  .timer-display {
+    font-size: clamp(2.8rem, 12vw, 4.2rem);
     font-weight: 200;
     letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
     color: #e0f0ff;
-    margin-bottom: 36px;
+    margin-bottom: 8px;
     text-shadow: 0 0 30px rgba(100,180,255,0.3);
+    transition: color 0.4s, text-shadow 0.4s;
+    line-height: 1.1;
   }
 
-  .controls {
-    display: inline-flex;
-    gap: 10px;
+  .timer-display.countdown-mode {
+    color: #ffe8c8;
+    text-shadow: 0 0 30px rgba(255,160,60,0.35);
+  }
+
+  .timer-display.warning {
+    color: #ff8c69;
+    text-shadow: 0 0 30px rgba(255,80,50,0.5);
+    animation: pulse-warn 0.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-warn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ── Countdown input ── */
+  .cd-input-row {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    gap: 6px;
+    margin-bottom: 22px;
     flex-wrap: nowrap;
-    margin-bottom: 28px;
-    white-space: nowrap;
   }
 
-  button {
-    padding: 11px 22px;
+  .cd-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .cd-group label {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dimmest);
+  }
+
+  .cd-input {
+    width: clamp(52px, 14vw, 66px);
+    padding: 8px 4px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    font-weight: 300;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.2s, background 0.2s;
+    -moz-appearance: textfield;
+  }
+
+  .cd-input::-webkit-inner-spin-button,
+  .cd-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .cd-input:focus {
+    outline: none;
+    border-color: rgba(247,151,30,0.6);
+    background: rgba(255,255,255,0.1);
+  }
+
+  .cd-sep {
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: var(--dim);
+    padding-bottom: 16px;
+    user-select: none;
+  }
+
+  /* ── Presets ── */
+  .presets {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+
+  .preset-btn {
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.65);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .preset-btn:hover {
+    background: rgba(247,151,30,0.2);
+    border-color: rgba(247,151,30,0.4);
+    color: #fff;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+  .controls button {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 110px;
+    padding: clamp(9px, 2.5vw, 12px) clamp(10px, 3vw, 20px);
     border: none;
     border-radius: 50px;
-    font-size: 0.9rem;
+    font-size: clamp(0.78rem, 2.5vw, 0.9rem);
     font-weight: 600;
     cursor: pointer;
     letter-spacing: 0.04em;
     transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+    white-space: nowrap;
   }
 
-  button:active { transform: scale(0.96); }
+  .controls button:active { transform: scale(0.95); }
 
   .btn-start {
     background: linear-gradient(135deg, #43cea2, #185a9d);
     color: #fff;
-    box-shadow: 0 4px 20px rgba(67,206,162,0.35);
+    box-shadow: 0 4px 18px rgba(67,206,162,0.3);
   }
 
   .btn-stop {
     background: linear-gradient(135deg, #f7971e, #e74c3c);
     color: #fff;
-    box-shadow: 0 4px 20px rgba(231,76,60,0.35);
+    box-shadow: 0 4px 18px rgba(231,76,60,0.3);
   }
 
   .btn-pause {
     background: linear-gradient(135deg, #a18cd1, #fbc2eb);
     color: #1a1a2e;
-    box-shadow: 0 4px 20px rgba(161,140,209,0.35);
+    box-shadow: 0 4px 18px rgba(161,140,209,0.3);
   }
 
   .btn-reset {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.09);
     color: rgba(255,255,255,0.75);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.15) !important;
   }
 
-  button:disabled { opacity: 0.35; cursor: default; }
-  button:not(:disabled):hover { box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+  .controls button:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+  .controls button:not(:disabled):hover { filter: brightness(1.1); }
 
+  /* ── Progress bar (countdown) ── */
+  .progress-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #f7971e, #e74c3c);
+    border-radius: 2px;
+    width: 100%;
+    transition: width 0.5s linear, background 0.5s;
+  }
+
+  .progress-bar.green { background: linear-gradient(90deg, #43cea2, #185a9d); }
+
+  /* ── Location ── */
   .location-block { padding-top: 4px; }
 
   .location-flag { margin-bottom: 6px; line-height: 1; }
 
   .location-flag img {
-    width: 48px;
-    height: 32px;
+    width: 44px;
+    height: 30px;
     object-fit: cover;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
 
-  .location-flag span { font-size: 2.2rem; }
+  .location-flag span { font-size: 2rem; }
 
   .location-city {
-    font-size: 1.05rem;
+    font-size: clamp(0.88rem, 3vw, 1.05rem);
     font-weight: 500;
     color: rgba(255,255,255,0.9);
   }
 
   .location-coords {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.4);
+    font-size: 0.78rem;
+    color: var(--dimmest);
     letter-spacing: 0.06em;
     margin-top: 4px;
     font-variant-numeric: tabular-nums;
   }
 
   .location-error {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: rgba(255,120,120,0.75);
     margin-top: 6px;
   }
 
+  /* ── Done toast ── */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: linear-gradient(135deg, #f7971e, #e74c3c);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    box-shadow: 0 8px 24px rgba(231,76,60,0.4);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Footer ── */
   footer {
-    margin-top: 28px;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.25);
+    margin-top: 24px;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.22);
     letter-spacing: 0.05em;
     text-align: center;
   }
 
-  footer span { color: rgba(255,255,255,0.45); font-weight: 600; }
+  footer span { color: rgba(255,255,255,0.42); font-weight: 600; }
+
+  /* ── Hidden utility ── */
+  .hidden { display: none !important; }
+
+  /* ── Small phones (<360px) ── */
+  @media (max-width: 360px) {
+    .controls { gap: 6px; }
+    .controls button { font-size: 0.72rem; padding: 8px 10px; }
+    .cd-input { width: 48px; font-size: 1rem; }
+    .cd-sep { font-size: 1.2rem; }
+  }
 </style>
 </head>
 <body>
+
+<div class="toast" id="toast">⏰ Time's up!</div>
+
 <div class="card">
 
-  <!-- 1. Date & Time -->
+  <!-- Clock -->
   <div class="date" id="date"></div>
   <div class="local-time" id="localTime"></div>
   <div class="divider"></div>
 
-  <!-- 2. Stopwatch -->
-  <div class="label">Stopwatch</div>
-  <div class="stopwatch" id="stopwatch">00:00:00</div>
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <button class="mode-btn active-sw" id="modeStopwatch" onclick="setMode('stopwatch')">⏱ Stopwatch</button>
+    <button class="mode-btn" id="modeCountdown" onclick="setMode('countdown')">⏳ Countdown</button>
+  </div>
+
+  <!-- Label -->
+  <div class="label" id="modeLabel">Stopwatch</div>
+
+  <!-- Display -->
+  <div class="timer-display" id="timerDisplay">00:00:00</div>
+
+  <!-- Progress bar (countdown only) -->
+  <div class="progress-wrap hidden" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Countdown input -->
+  <div class="cd-input-row hidden" id="cdInputRow">
+    <div class="cd-group">
+      <label>HH</label>
+      <input class="cd-input" id="cdH" type="number" min="0" max="99" value="0" placeholder="00">
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-group">
+      <label>MM</label>
+      <input class="cd-input" id="cdM" type="number" min="0" max="59" value="5" placeholder="00">
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-group">
+      <label>SS</label>
+      <input class="cd-input" id="cdS" type="number" min="0" max="59" value="0" placeholder="00">
+    </div>
+  </div>
+
+  <!-- Presets (countdown only) -->
+  <div class="presets hidden" id="presetsRow">
+    <button class="preset-btn" onclick="applyPreset(1,0,0)">1 hr</button>
+    <button class="preset-btn" onclick="applyPreset(0,30,0)">30 min</button>
+    <button class="preset-btn" onclick="applyPreset(0,10,0)">10 min</button>
+    <button class="preset-btn" onclick="applyPreset(0,5,0)">5 min</button>
+    <button class="preset-btn" onclick="applyPreset(0,1,0)">1 min</button>
+    <button class="preset-btn" onclick="applyPreset(0,0,30)">30 sec</button>
+  </div>
+
+  <!-- Controls -->
   <div class="controls">
     <button class="btn-start" id="startBtn" onclick="startTimer()">Start</button>
-    <button class="btn-stop" id="stopBtn" onclick="stopTimer()" disabled>Stop</button>
+    <button class="btn-stop"  id="stopBtn"  onclick="stopTimer()"   disabled>Stop</button>
     <button class="btn-pause" id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
-    <button class="btn-reset" onclick="resetTimer()">Reset</button>
+    <button class="btn-reset"              onclick="resetTimer()">Reset</button>
   </div>
+
   <div class="divider"></div>
 
-  <!-- 3. Location -->
+  <!-- Location -->
   <div class="location-block">
     <div class="location-flag" id="locFlag"><span>🌐</span></div>
     <div class="location-city" id="locCity">Detecting location…</div>
@@ -200,111 +461,95 @@
 <footer>Engineered by <span>Carlos Martinez</span> using <span>Claude</span></footer>
 
 <script>
-  // ── Clock ──────────────────────────────────────────────
-  function pad(n) { return String(n).padStart(2, '0'); }
+  // ── Helpers ─────────────────────────────────────────────
+  const $  = id => document.getElementById(id);
+  const pad = n  => String(n).padStart(2, '0');
+  const show = id => $(id).classList.remove('hidden');
+  const hide = id => $(id).classList.add('hidden');
 
+  // ── Clock ────────────────────────────────────────────────
   function updateClock() {
     const now = new Date();
-    document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+    $('date').textContent = now.toLocaleDateString('en-US', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
-    document.getElementById('localTime').textContent = now.toLocaleTimeString('en-US', {
+    $('localTime').textContent = now.toLocaleTimeString('en-US', {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
   }
   updateClock();
   setInterval(updateClock, 1000);
 
-  // ── Location ───────────────────────────────────────────
-  function showLocationError(msg) {
-    document.getElementById('locFlag').innerHTML = '<span>🌐</span>';
-    document.getElementById('locCity').textContent = 'Location unavailable';
-    document.getElementById('locError').textContent = msg;
-  }
+  // ── State ────────────────────────────────────────────────
+  let mode     = 'stopwatch'; // 'stopwatch' | 'countdown'
+  let elapsed  = 0;
+  let cdTotal  = 0;
+  let interval = null;
+  let running  = false;
+  let paused   = false;
 
-  function renderLocation(lat, lon, code, city, country) {
-    const latF = parseFloat(lat).toFixed(5);
-    const lonF = parseFloat(lon).toFixed(5);
-    const c = (code || '').toLowerCase();
-    document.getElementById('locCoords').textContent =
-      `${Math.abs(latF)}° ${latF >= 0 ? 'N' : 'S'}  /  ${Math.abs(lonF)}° ${lonF >= 0 ? 'E' : 'W'}`;
-    document.getElementById('locFlag').innerHTML = c
-      ? `<img src="https://flagcdn.com/w80/${c}.png" alt="${country} flag" title="${country}">`
-      : '<span>🌐</span>';
-    document.getElementById('locCity').textContent =
-      `${city || 'Unknown city'}, ${country || 'Unknown country'}`;
-  }
+  // ── Mode switching ───────────────────────────────────────
+  function setMode(m) {
+    if (running || paused) resetTimer();
+    mode = m;
+    $('modeStopwatch').className = 'mode-btn' + (m === 'stopwatch' ? ' active-sw' : '');
+    $('modeCountdown').className = 'mode-btn' + (m === 'countdown' ? ' active-cd' : '');
+    $('modeLabel').textContent   = m === 'stopwatch' ? 'Stopwatch' : 'Countdown';
 
-  async function reverseGeocode(lat, lon) {
-    const r = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    const d = await r.json();
-    const addr = d.address || {};
-    return {
-      city: addr.city || addr.town || addr.village || addr.county || 'Unknown city',
-      country: addr.country || 'Unknown country',
-      code: addr.country_code || ''
-    };
-  }
+    const disp = $('timerDisplay');
+    disp.className = 'timer-display' + (m === 'countdown' ? ' countdown-mode' : '');
 
-  async function ipFallback() {
-    const services = [
-      async () => {
-        const r = await fetch('https://ipapi.co/json/');
-        const d = await r.json();
-        if (d.error) throw new Error(d.reason);
-        return { lat: d.latitude, lon: d.longitude, code: d.country_code, city: d.city, country: d.country_name };
-      },
-      async () => {
-        const r = await fetch('https://ip-api.com/json/?fields=status,city,country,countryCode,lat,lon');
-        const d = await r.json();
-        if (d.status !== 'success') throw new Error('failed');
-        return { lat: d.lat, lon: d.lon, code: d.countryCode, city: d.city, country: d.country };
-      },
-      async () => {
-        const r = await fetch('https://freeipapi.com/api/json');
-        const d = await r.json();
-        return { lat: d.latitude, lon: d.longitude, code: d.countryCode, city: d.cityName, country: d.countryName };
-      },
-      async () => {
-        const r = await fetch('https://ipwho.is/');
-        const d = await r.json();
-        if (!d.success) throw new Error('failed');
-        return { lat: d.latitude, lon: d.longitude, code: d.country_code, city: d.city, country: d.country };
-      }
-    ];
-    for (const svc of services) {
-      try {
-        const { lat, lon, code, city, country } = await svc();
-        renderLocation(lat, lon, code, city, country);
-        return;
-      } catch { /* try next */ }
+    if (m === 'stopwatch') {
+      hide('cdInputRow'); hide('presetsRow'); hide('progressWrap');
+      disp.textContent = '00:00:00';
+    } else {
+      show('cdInputRow'); show('presetsRow'); show('progressWrap');
+      syncCountdownDisplay();
     }
-    showLocationError('Location could not be determined.');
   }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const { latitude: lat, longitude: lon } = pos.coords;
-        try {
-          const { city, country, code } = await reverseGeocode(lat, lon);
-          renderLocation(lat, lon, code, city, country);
-        } catch {
-          renderLocation(lat, lon, '', 'Unknown city', 'Unknown country');
-        }
-      },
-      () => ipFallback(),
-      { timeout: 8000 }
-    );
-  } else {
-    ipFallback();
+  // ── Countdown helpers ────────────────────────────────────
+  function getCdSeconds() {
+    const h = Math.min(99, Math.max(0, parseInt($('cdH').value) || 0));
+    const m = Math.min(59, Math.max(0, parseInt($('cdM').value) || 0));
+    const s = Math.min(59, Math.max(0, parseInt($('cdS').value) || 0));
+    return h * 3600 + m * 60 + s;
   }
 
-  // ── Stopwatch ──────────────────────────────────────────
-  let elapsed = 0, interval = null, running = false, paused = false;
+  function syncCountdownDisplay() {
+    const secs = getCdSeconds();
+    $('timerDisplay').textContent = formatSecs(secs);
+    updateProgress(secs, secs);
+  }
+
+  function applyPreset(h, m, s) {
+    $('cdH').value = h; $('cdM').value = m; $('cdS').value = s;
+    syncCountdownDisplay();
+  }
+
+  ['cdH','cdM','cdS'].forEach(id => {
+    $(id).addEventListener('input', syncCountdownDisplay);
+  });
+
+  function formatSecs(total) {
+    total = Math.max(0, Math.floor(total));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  function updateProgress(remaining, total) {
+    if (!total) { $('progressBar').style.width = '100%'; return; }
+    const pct = (remaining / total) * 100;
+    $('progressBar').style.width = pct + '%';
+    if (pct > 30) {
+      $('progressBar').classList.add('green');
+      $('progressBar').classList.remove('red');
+    } else {
+      $('progressBar').classList.remove('green');
+    }
+  }
 
   function formatElapsed(ms) {
     const h = Math.floor(ms / 3600000);
@@ -313,43 +558,103 @@
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
+  // ── Timer controls ───────────────────────────────────────
   function startTimer() {
     if (running) return;
+
+    if (mode === 'countdown') {
+      const secs = getCdSeconds();
+      if (!secs) return;                // nothing set
+      cdTotal  = secs;
+      elapsed  = 0;
+    }
+
     running = true; paused = false;
-    const startTime = Date.now() - elapsed;
-    interval = setInterval(() => {
-      elapsed = Date.now() - startTime;
-      document.getElementById('stopwatch').textContent = formatElapsed(elapsed);
-    }, 100);
-    document.getElementById('startBtn').disabled = true;
-    document.getElementById('stopBtn').disabled = false;
-    document.getElementById('pauseBtn').disabled = false;
-    document.getElementById('pauseBtn').textContent = 'Pause';
+    const startRef = Date.now() - elapsed;
+
+    if (mode === 'stopwatch') {
+      interval = setInterval(() => {
+        elapsed = Date.now() - startRef;
+        $('timerDisplay').textContent = formatElapsed(elapsed);
+      }, 100);
+    } else {
+      // disable inputs while running
+      ['cdH','cdM','cdS'].forEach(id => $(id).disabled = true);
+      $('presetsRow').style.opacity = '0.4';
+      $('presetsRow').style.pointerEvents = 'none';
+
+      interval = setInterval(() => {
+        elapsed = Date.now() - startRef;
+        const remaining = cdTotal - elapsed / 1000;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          running = false;
+          $('timerDisplay').textContent = '00:00:00';
+          $('timerDisplay').classList.add('warning');
+          updateProgress(0, cdTotal);
+          setBtns(false, true, true);
+          showToast();
+          ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
+          $('presetsRow').style.opacity = '';
+          $('presetsRow').style.pointerEvents = '';
+          return;
+        }
+        const pct = remaining <= 10 ? 'warning' : '';
+        $('timerDisplay').className = 'timer-display countdown-mode' + (remaining <= 10 ? ' warning' : '');
+        $('timerDisplay').textContent = formatSecs(remaining);
+        updateProgress(remaining, cdTotal);
+      }, 100);
+    }
+
+    setBtns(true, false, false);
   }
 
   function stopTimer() {
     if (!running && !paused) return;
     running = false; paused = false;
     clearInterval(interval);
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('stopBtn').disabled = true;
-    document.getElementById('pauseBtn').disabled = true;
-    document.getElementById('pauseBtn').textContent = 'Pause';
+    ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
+    if ($('presetsRow')) { $('presetsRow').style.opacity = ''; $('presetsRow').style.pointerEvents = ''; }
+    setBtns(false, true, true);
   }
 
   function togglePause() {
     if (running) {
       running = false; paused = true;
       clearInterval(interval);
-      document.getElementById('pauseBtn').textContent = 'Resume';
+      $('pauseBtn').textContent = 'Resume';
     } else if (paused) {
       paused = false; running = true;
-      const startTime = Date.now() - elapsed;
-      interval = setInterval(() => {
-        elapsed = Date.now() - startTime;
-        document.getElementById('stopwatch').textContent = formatElapsed(elapsed);
-      }, 100);
-      document.getElementById('pauseBtn').textContent = 'Pause';
+      const startRef = Date.now() - elapsed;
+
+      if (mode === 'stopwatch') {
+        interval = setInterval(() => {
+          elapsed = Date.now() - startRef;
+          $('timerDisplay').textContent = formatElapsed(elapsed);
+        }, 100);
+      } else {
+        interval = setInterval(() => {
+          elapsed = Date.now() - startRef;
+          const remaining = cdTotal - elapsed / 1000;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            running = false;
+            $('timerDisplay').textContent = '00:00:00';
+            $('timerDisplay').classList.add('warning');
+            updateProgress(0, cdTotal);
+            setBtns(false, true, true);
+            showToast();
+            ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
+            $('presetsRow').style.opacity = '';
+            $('presetsRow').style.pointerEvents = '';
+            return;
+          }
+          $('timerDisplay').className = 'timer-display countdown-mode' + (remaining <= 10 ? ' warning' : '');
+          $('timerDisplay').textContent = formatSecs(remaining);
+          updateProgress(remaining, cdTotal);
+        }, 100);
+      }
+      $('pauseBtn').textContent = 'Pause';
     }
   }
 
@@ -357,12 +662,90 @@
     running = false; paused = false;
     clearInterval(interval);
     elapsed = 0;
-    document.getElementById('stopwatch').textContent = '00:00:00';
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('stopBtn').disabled = true;
-    document.getElementById('pauseBtn').disabled = true;
-    document.getElementById('pauseBtn').textContent = 'Pause';
+    ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
+    if ($('presetsRow')) { $('presetsRow').style.opacity = ''; $('presetsRow').style.pointerEvents = ''; }
+    $('timerDisplay').className = 'timer-display' + (mode === 'countdown' ? ' countdown-mode' : '');
+    if (mode === 'stopwatch') {
+      $('timerDisplay').textContent = '00:00:00';
+    } else {
+      syncCountdownDisplay();
+    }
+    updateProgress(1, 1);
+    setBtns(false, true, true);
+    $('pauseBtn').textContent = 'Pause';
   }
+
+  function setBtns(started, startDis, stopPauseDis) {
+    $('startBtn').disabled = started;
+    $('stopBtn').disabled  = stopPauseDis;
+    $('pauseBtn').disabled = stopPauseDis;
+  }
+
+  // ── Toast ────────────────────────────────────────────────
+  let toastTimer;
+  function showToast() {
+    clearTimeout(toastTimer);
+    $('toast').classList.add('show');
+    toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3500);
+  }
+
+  // ── Location ─────────────────────────────────────────────
+  function showLocationError(msg) {
+    $('locFlag').innerHTML = '<span>🌐</span>';
+    $('locCity').textContent = 'Location unavailable';
+    $('locError').textContent = msg;
+  }
+
+  function renderLocation(lat, lon, code, city, country) {
+    const latF = parseFloat(lat).toFixed(5);
+    const lonF = parseFloat(lon).toFixed(5);
+    const c = (code || '').toLowerCase();
+    $('locCoords').textContent =
+      `${Math.abs(latF)}°${latF >= 0 ? 'N' : 'S'}  /  ${Math.abs(lonF)}°${lonF >= 0 ? 'E' : 'W'}`;
+    $('locFlag').innerHTML = c
+      ? `<img src="https://flagcdn.com/w80/${c}.png" alt="${country}" title="${country}">`
+      : '<span>🌐</span>';
+    $('locCity').textContent = `${city || 'Unknown city'}, ${country || 'Unknown country'}`;
+  }
+
+  async function reverseGeocode(lat, lon) {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const d = await r.json();
+    const a = d.address || {};
+    return {
+      city: a.city || a.town || a.village || a.county || 'Unknown city',
+      country: a.country || 'Unknown country',
+      code: a.country_code || ''
+    };
+  }
+
+  async function ipFallback() {
+    const services = [
+      async () => { const r=await fetch('https://ipapi.co/json/'); const d=await r.json(); if(d.error) throw 0; return {lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country_name}; },
+      async () => { const r=await fetch('https://ip-api.com/json/?fields=status,city,country,countryCode,lat,lon'); const d=await r.json(); if(d.status!=='success') throw 0; return {lat:d.lat,lon:d.lon,code:d.countryCode,city:d.city,country:d.country}; },
+      async () => { const r=await fetch('https://freeipapi.com/api/json'); const d=await r.json(); return {lat:d.latitude,lon:d.longitude,code:d.countryCode,city:d.cityName,country:d.countryName}; },
+      async () => { const r=await fetch('https://ipwho.is/'); const d=await r.json(); if(!d.success) throw 0; return {lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country}; }
+    ];
+    for (const svc of services) {
+      try { const {lat,lon,code,city,country}=await svc(); renderLocation(lat,lon,code,city,country); return; } catch {}
+    }
+    showLocationError('Location could not be determined.');
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        try { const {city,country,code}=await reverseGeocode(lat,lon); renderLocation(lat,lon,code,city,country); }
+        catch { renderLocation(lat,lon,'','Unknown city','Unknown country'); }
+      },
+      () => ipFallback(),
+      { timeout: 8000 }
+    );
+  } else { ipFallback(); }
 </script>
 </body>
 </html>
