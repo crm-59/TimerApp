@@ -82,16 +82,17 @@
     transition: background var(--transition), color var(--transition);
   }
 
-  /* ── Top bar (theme toggle) ── */
+  /* ── Top bar ── */
   .top-bar {
     width: 100%;
     max-width: 480px;
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
     margin-bottom: 10px;
   }
 
-  .theme-btn {
+  .theme-btn, .fs-btn {
     background: var(--theme-btn-bg);
     border: 1px solid var(--border);
     border-radius: 50px;
@@ -106,7 +107,112 @@
     align-items: center;
     gap: 6px;
   }
-  .theme-btn:hover { background: var(--border); }
+  .theme-btn:hover, .fs-btn:hover { background: var(--border); }
+
+  /* ── Fullscreen overlay ── */
+  .fs-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition);
+    padding: 24px;
+  }
+  .fs-overlay.active { display: flex; }
+
+  .fs-exit-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: var(--theme-btn-bg);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 0.82rem; font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    color: var(--theme-btn-color);
+    transition: background 0.2s;
+  }
+  .fs-exit-btn:hover { background: var(--border); }
+
+  .fs-label {
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin-bottom: 16px;
+  }
+
+  .fs-display {
+    font-size: clamp(5rem, 22vw, 18rem);
+    font-weight: 100;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--sw-display);
+    text-shadow: 0 0 60px var(--sw-shadow);
+    line-height: 1;
+    transition: color 0.4s, text-shadow 0.4s;
+    text-align: center;
+  }
+  .fs-display.countdown-mode { color: #d97c20; text-shadow: 0 0 60px rgba(255,140,40,0.35); }
+  body.light .fs-display.countdown-mode { color: #b85c00; }
+  .fs-display.warning {
+    color: #e84040 !important;
+    text-shadow: 0 0 60px rgba(255,60,60,0.6) !important;
+    animation: pulse-warn 0.7s ease-in-out infinite;
+  }
+
+  .fs-progress-wrap {
+    width: min(600px, 80vw);
+    height: 6px;
+    background: var(--lap-border);
+    border-radius: 3px;
+    margin-top: 28px;
+    overflow: hidden;
+  }
+  .fs-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg,#43cea2,#185a9d);
+    border-radius: 3px; width: 100%;
+    transition: width 0.4s linear, background 0.5s;
+  }
+  .fs-progress-bar.orange { background: linear-gradient(90deg,#f7971e,#e74c3c); }
+
+  .fs-controls {
+    display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; justify-content: center;
+  }
+  .fs-controls button {
+    padding: clamp(12px,2vw,16px) clamp(24px,4vw,40px);
+    border: none; border-radius: 50px;
+    font-size: clamp(0.9rem,2vw,1.1rem);
+    font-weight: 700; cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: transform 0.1s, filter 0.2s, opacity 0.2s;
+  }
+  .fs-controls button:active { transform: scale(0.95); }
+  .fs-controls button:not(:disabled):hover { filter: brightness(1.12); }
+  .fs-controls button:disabled { opacity: 0.28; cursor: default; pointer-events: none; }
+  .fs-controls .btn-start { background: linear-gradient(135deg,#43cea2,#185a9d); color:#fff; box-shadow:0 6px 24px rgba(67,206,162,0.3); }
+  .fs-controls .btn-stop  { background: linear-gradient(135deg,#f7971e,#e74c3c); color:#fff; box-shadow:0 6px 24px rgba(231,76,60,0.3); }
+  .fs-controls .btn-pause { background: linear-gradient(135deg,#a18cd1,#fbc2eb); color:#1a1a2e; box-shadow:0 6px 24px rgba(161,140,209,0.3); }
+  .fs-controls .btn-reset { background: var(--reset-bg); color: var(--reset-color); border: 1px solid var(--reset-border) !important; }
+  .fs-controls .btn-lap   { background: linear-gradient(135deg,#11998e,#38ef7d); color:#0d2010; box-shadow:0 6px 24px rgba(17,153,142,0.3); }
+
+  .fs-date {
+    font-size: clamp(0.75rem, 1.8vw, 1rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 32px;
+  }
+  .fs-time {
+    font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: var(--text-soft);
+    margin-top: 6px;
+  }
 
   /* ── Card ── */
   .card {
@@ -388,6 +494,26 @@
 
 <div class="top-bar">
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light Mode</button>
+  <button class="fs-btn" onclick="enterFullscreen()">⛶ Fullscreen</button>
+</div>
+
+<!-- Fullscreen overlay -->
+<div class="fs-overlay" id="fsOverlay">
+  <button class="fs-exit-btn" onclick="exitFullscreen()">✕ Exit</button>
+  <div class="fs-label" id="fsLabel">Stopwatch</div>
+  <div class="fs-display" id="fsDisplay">00:00:00</div>
+  <div class="fs-progress-wrap" id="fsProgressWrap" style="display:none">
+    <div class="fs-progress-bar" id="fsProgressBar"></div>
+  </div>
+  <div class="fs-controls">
+    <button class="btn-start" id="fsStartBtn" onclick="startTimer()">Start</button>
+    <button class="btn-stop"  id="fsStopBtn"  onclick="stopTimer()"   disabled>Stop</button>
+    <button class="btn-pause" id="fsPauseBtn" onclick="togglePause()" disabled>Pause</button>
+    <button class="btn-lap"   id="fsLapBtn"   onclick="recordLap()"   disabled>Lap</button>
+    <button class="btn-reset"                 onclick="resetTimer()">Reset</button>
+  </div>
+  <div class="fs-date" id="fsDate"></div>
+  <div class="fs-time" id="fsTime"></div>
 </div>
 
 <div class="card">
@@ -477,11 +603,63 @@
     $('themeBtn').textContent = darkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
   }
 
+  // ── Fullscreen ───────────────────────────────────────────
+  let fsActive = false;
+
+  function enterFullscreen() {
+    fsActive = true;
+    $('fsOverlay').classList.add('active');
+    syncFsDisplay();
+    syncFsBtns();
+    try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e){}
+  }
+
+  function exitFullscreen() {
+    fsActive = false;
+    $('fsOverlay').classList.remove('active');
+    try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
+  }
+
+  function syncFsDisplay() {
+    if (!fsActive) return;
+    const main = $('timerDisplay');
+    const fs   = $('fsDisplay');
+    fs.textContent = main.textContent;
+    fs.className   = 'fs-display'
+      + (main.classList.contains('countdown-mode') ? ' countdown-mode' : '')
+      + (main.classList.contains('warning')        ? ' warning'        : '');
+    $('fsLabel').textContent = $('modeLabel').textContent;
+    if (mode === 'countdown') {
+      $('fsProgressWrap').style.display = 'block';
+      $('fsProgressBar').style.width    = $('progressBar').style.width;
+      $('fsProgressBar').className      = 'fs-progress-bar' + ($('progressBar').classList.contains('orange') ? ' orange' : '');
+    } else {
+      $('fsProgressWrap').style.display = 'none';
+    }
+  }
+
+  function syncFsBtns() {
+    if (!fsActive) return;
+    $('fsStartBtn').disabled = $('startBtn').disabled;
+    $('fsStopBtn').disabled  = $('stopBtn').disabled;
+    $('fsPauseBtn').disabled = $('pauseBtn').disabled;
+    $('fsLapBtn').disabled   = $('lapBtn').disabled;
+    $('fsPauseBtn').textContent = $('pauseBtn').textContent;
+    $('fsLapBtn').style.display = (mode === 'stopwatch') ? '' : 'none';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && fsActive) exitFullscreen(); });
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && fsActive) exitFullscreen(); });
+
   // ── Clock ────────────────────────────────────────────────
   function updateClock() {
     const now = new Date();
-    $('date').textContent = now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    $('localTime').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const dateStr = now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    $('date').textContent      = dateStr;
+    $('localTime').textContent = timeStr;
+    $('fsDate').textContent    = dateStr;
+    $('fsTime').textContent    = timeStr;
   }
   updateClock(); setInterval(updateClock,1000);
 
@@ -659,6 +837,7 @@
     return () => {
       elapsed = Date.now() - startRef;
       $('timerDisplay').textContent = formatElapsed(elapsed);
+      syncFsDisplay();
     };
   }
   function makeCdTick(startRef) {
@@ -669,6 +848,7 @@
       $('timerDisplay').className = 'timer-display countdown-mode' + (remaining<=10?' warning':'');
       $('timerDisplay').textContent = formatSecs(remaining);
       updateProgress(remaining, cdTotal);
+      syncFsDisplay();
     };
   }
 
@@ -704,12 +884,14 @@
       clearInterval(interval);
       $('pauseBtn').textContent='Resume';
       $('lapBtn').disabled=true;
+      syncFsBtns();
     } else if (paused) {
       paused=false; running=true;
       const startRef = Date.now() - elapsed;
       interval = setInterval(mode==='stopwatch' ? makeSwTick(startRef) : makeCdTick(startRef), 80);
       $('pauseBtn').textContent='Pause';
       if (mode==='stopwatch') $('lapBtn').disabled=false;
+      syncFsBtns();
     }
   }
 
@@ -733,6 +915,7 @@
     $('startBtn').disabled = started;
     $('stopBtn').disabled  = stopPauseDis;
     $('pauseBtn').disabled = stopPauseDis;
+    syncFsBtns();
   }
 
   // show lap button initially in stopwatch mode
