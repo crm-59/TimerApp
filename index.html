@@ -6,19 +6,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Timer App</title>
 <style>
+  /* ── Theme variables ── */
   :root {
-    --bg1: #1a1a2e;
-    --bg2: #16213e;
-    --bg3: #0f3460;
+    --bg1: #1a1a2e; --bg2: #16213e; --bg3: #0f3460;
     --glass: rgba(255,255,255,0.05);
     --border: rgba(255,255,255,0.1);
+    --card-bg: rgba(255,255,255,0.05);
     --text: #fff;
+    --text-soft: rgba(255,255,255,0.85);
     --dim: rgba(255,255,255,0.5);
     --dimmer: rgba(255,255,255,0.35);
-    --dimmest: rgba(255,255,255,0.25);
-    --accent-sw: #64b4ff;
-    --accent-cd: #ffb347;
+    --dimmest: rgba(255,255,255,0.22);
+    --lap-bg: rgba(255,255,255,0.04);
+    --lap-border: rgba(255,255,255,0.08);
+    --lap-text: rgba(255,255,255,0.75);
+    --lap-num: rgba(255,255,255,0.35);
+    --input-bg: rgba(255,255,255,0.07);
+    --input-border: rgba(255,255,255,0.15);
+    --cd-input-color: #fff;
+    --mode-bg: rgba(0,0,0,0.25);
+    --preset-bg: rgba(255,255,255,0.06);
+    --preset-color: rgba(255,255,255,0.65);
+    --reset-bg: rgba(255,255,255,0.09);
+    --reset-color: rgba(255,255,255,0.75);
+    --reset-border: rgba(255,255,255,0.15);
+    --theme-btn-bg: rgba(255,255,255,0.08);
+    --theme-btn-color: rgba(255,255,255,0.6);
+    --sw-display: #e0f0ff;
+    --sw-shadow: rgba(100,180,255,0.3);
     --rad: 24px;
+    --transition: 0.35s ease;
+  }
+
+  body.light {
+    --bg1: #e8edf5; --bg2: #d4dce8; --bg3: #b8c8de;
+    --glass: rgba(255,255,255,0.55);
+    --border: rgba(0,0,0,0.1);
+    --card-bg: rgba(255,255,255,0.7);
+    --text: #1a1a2e;
+    --text-soft: rgba(20,30,60,0.88);
+    --dim: rgba(20,30,60,0.5);
+    --dimmer: rgba(20,30,60,0.4);
+    --dimmest: rgba(20,30,60,0.28);
+    --lap-bg: rgba(0,0,0,0.03);
+    --lap-border: rgba(0,0,0,0.08);
+    --lap-text: rgba(20,30,60,0.8);
+    --lap-num: rgba(20,30,60,0.38);
+    --input-bg: rgba(0,0,0,0.05);
+    --input-border: rgba(0,0,0,0.15);
+    --cd-input-color: #1a1a2e;
+    --mode-bg: rgba(0,0,0,0.07);
+    --preset-bg: rgba(0,0,0,0.05);
+    --preset-color: rgba(20,30,60,0.65);
+    --reset-bg: rgba(0,0,0,0.06);
+    --reset-color: rgba(20,30,60,0.7);
+    --reset-border: rgba(0,0,0,0.12);
+    --theme-btn-bg: rgba(0,0,0,0.07);
+    --theme-btn-color: rgba(20,30,60,0.6);
+    --sw-display: #1a3a6e;
+    --sw-shadow: rgba(30,80,180,0.18);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,61 +79,86 @@
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: var(--text);
     padding: 20px 16px 40px;
+    transition: background var(--transition), color var(--transition);
   }
+
+  /* ── Top bar (theme toggle) ── */
+  .top-bar {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+
+  .theme-btn {
+    background: var(--theme-btn-bg);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    color: var(--theme-btn-color);
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .theme-btn:hover { background: var(--border); }
 
   /* ── Card ── */
   .card {
-    background: var(--glass);
+    background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: var(--rad);
-    padding: clamp(24px, 5vw, 44px) clamp(20px, 6vw, 52px);
+    padding: clamp(22px, 5vw, 42px) clamp(18px, 6vw, 50px);
     text-align: center;
     backdrop-filter: blur(14px);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25);
     width: 100%;
     max-width: 480px;
-    transition: box-shadow 0.3s;
+    transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
   }
 
   /* ── Clock ── */
   .date {
-    font-size: clamp(0.7rem, 2.5vw, 0.95rem);
+    font-size: clamp(0.68rem, 2.5vw, 0.92rem);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--dim);
     margin-bottom: 4px;
   }
-
   .local-time {
-    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    font-size: clamp(1.55rem, 6vw, 2.35rem);
     font-weight: 300;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 22px;
+    color: var(--text-soft);
+    margin-bottom: 20px;
   }
 
   .divider {
     height: 1px;
     background: var(--border);
-    margin: 0 -8px 20px;
+    margin: 0 -8px 18px;
   }
 
-  /* ── Mode Toggle ── */
+  /* ── Mode toggle ── */
   .mode-toggle {
     display: inline-flex;
-    background: rgba(0,0,0,0.25);
+    background: var(--mode-bg);
     border: 1px solid var(--border);
     border-radius: 50px;
     padding: 4px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     gap: 2px;
   }
-
   .mode-btn {
-    padding: 7px 20px;
+    padding: 7px 18px;
     border: none;
     border-radius: 50px;
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-size: clamp(0.73rem, 2.5vw, 0.84rem);
     font-weight: 600;
     letter-spacing: 0.06em;
     cursor: pointer;
@@ -95,296 +166,229 @@
     background: transparent;
     transition: background 0.25s, color 0.25s, box-shadow 0.25s;
   }
-
-  .mode-btn.active-sw {
-    background: linear-gradient(135deg, #1e88e5, #0d47a1);
-    color: #fff;
-    box-shadow: 0 2px 12px rgba(30,136,229,0.4);
-  }
-
-  .mode-btn.active-cd {
-    background: linear-gradient(135deg, #f7971e, #e74c3c);
-    color: #fff;
-    box-shadow: 0 2px 12px rgba(231,76,60,0.4);
-  }
+  .mode-btn.active-sw { background: linear-gradient(135deg,#1e88e5,#0d47a1); color:#fff; box-shadow:0 2px 12px rgba(30,136,229,0.4); }
+  .mode-btn.active-cd { background: linear-gradient(135deg,#f7971e,#e74c3c); color:#fff; box-shadow:0 2px 12px rgba(231,76,60,0.4); }
 
   /* ── Label ── */
   .label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--dimmer);
-    margin-bottom: 10px;
-    transition: color 0.3s;
+    margin-bottom: 8px;
   }
 
   /* ── Display ── */
   .timer-display {
-    font-size: clamp(2.8rem, 12vw, 4.2rem);
+    font-size: clamp(2.7rem, 12vw, 4.1rem);
     font-weight: 200;
     letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
-    color: #e0f0ff;
-    margin-bottom: 8px;
-    text-shadow: 0 0 30px rgba(100,180,255,0.3);
+    color: var(--sw-display);
+    margin-bottom: 6px;
+    text-shadow: 0 0 28px var(--sw-shadow);
     transition: color 0.4s, text-shadow 0.4s;
     line-height: 1.1;
   }
-
-  .timer-display.countdown-mode {
-    color: #ffe8c8;
-    text-shadow: 0 0 30px rgba(255,160,60,0.35);
-  }
-
+  .timer-display.countdown-mode { color: #d97c20; text-shadow: 0 0 28px rgba(255,140,40,0.3); }
+  body.light .timer-display.countdown-mode { color: #b85c00; }
   .timer-display.warning {
-    color: #ff8c69;
-    text-shadow: 0 0 30px rgba(255,80,50,0.5);
-    animation: pulse-warn 0.8s ease-in-out infinite;
+    color: #e84040 !important;
+    text-shadow: 0 0 30px rgba(255,60,60,0.55) !important;
+    animation: pulse-warn 0.7s ease-in-out infinite;
   }
+  @keyframes pulse-warn { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-  @keyframes pulse-warn {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+  /* ── Screen flash overlay ── */
+  .flash-overlay {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 998;
+    background: rgba(255,80,50,0.22);
+    animation: none;
+  }
+  .flash-overlay.flashing {
+    animation: screen-flash 0.6s ease-out 5;
+  }
+  @keyframes screen-flash {
+    0%  { opacity: 0.7; }
+    100%{ opacity: 0; }
   }
 
   /* ── Countdown input ── */
   .cd-input-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 22px;
-    flex-wrap: nowrap;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin-bottom: 20px; flex-wrap: nowrap;
   }
-
-  .cd-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-  }
-
-  .cd-group label {
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--dimmest);
-  }
-
+  .cd-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .cd-group label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dimmest); }
   .cd-input {
-    width: clamp(52px, 14vw, 66px);
+    width: clamp(50px, 14vw, 64px);
     padding: 8px 4px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 10px;
-    color: #fff;
-    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    color: var(--cd-input-color);
+    font-size: clamp(1.05rem, 4vw, 1.35rem);
     font-weight: 300;
     text-align: center;
     font-variant-numeric: tabular-nums;
     transition: border-color 0.2s, background 0.2s;
     -moz-appearance: textfield;
   }
-
   .cd-input::-webkit-inner-spin-button,
   .cd-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-
-  .cd-input:focus {
-    outline: none;
-    border-color: rgba(247,151,30,0.6);
-    background: rgba(255,255,255,0.1);
-  }
-
-  .cd-sep {
-    font-size: 1.5rem;
-    font-weight: 200;
-    color: var(--dim);
-    padding-bottom: 16px;
-    user-select: none;
-  }
+  .cd-input:focus { outline: none; border-color: rgba(247,151,30,0.6); background: var(--input-bg); }
+  .cd-sep { font-size: 1.45rem; font-weight: 200; color: var(--dim); padding-bottom: 16px; user-select: none; }
 
   /* ── Presets ── */
   .presets {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
+    display: flex; gap: 5px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 16px;
   }
-
   .preset-btn {
-    padding: 5px 12px;
-    border: 1px solid rgba(255,255,255,0.15);
+    padding: 5px 11px;
+    border: 1px solid var(--input-border);
     border-radius: 50px;
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.65);
-    font-size: 0.75rem;
-    font-weight: 600;
+    background: var(--preset-bg);
+    color: var(--preset-color);
+    font-size: 0.73rem; font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
     letter-spacing: 0.04em;
   }
+  .preset-btn:hover { background: rgba(247,151,30,0.18); border-color: rgba(247,151,30,0.4); color: var(--text); }
 
-  .preset-btn:hover {
-    background: rgba(247,151,30,0.2);
-    border-color: rgba(247,151,30,0.4);
-    color: #fff;
+  /* ── Progress bar ── */
+  .progress-wrap {
+    height: 4px;
+    background: var(--lap-border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
   }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg,#43cea2,#185a9d);
+    border-radius: 2px; width: 100%;
+    transition: width 0.4s linear, background 0.5s;
+  }
+  .progress-bar.orange { background: linear-gradient(90deg,#f7971e,#e74c3c); }
 
   /* ── Controls ── */
   .controls {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 22px;
+    display: flex; gap: 7px;
+    justify-content: center; flex-wrap: wrap;
+    margin-bottom: 18px;
   }
-
   .controls button {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: 110px;
-    padding: clamp(9px, 2.5vw, 12px) clamp(10px, 3vw, 20px);
-    border: none;
-    border-radius: 50px;
-    font-size: clamp(0.78rem, 2.5vw, 0.9rem);
-    font-weight: 600;
-    cursor: pointer;
+    flex: 1 1 auto; min-width: 0; max-width: 108px;
+    padding: clamp(9px,2.5vw,12px) clamp(9px,3vw,18px);
+    border: none; border-radius: 50px;
+    font-size: clamp(0.76rem,2.5vw,0.88rem);
+    font-weight: 600; cursor: pointer;
     letter-spacing: 0.04em;
-    transition: transform 0.1s, box-shadow 0.2s, opacity 0.2s;
+    transition: transform 0.1s, filter 0.2s, opacity 0.2s;
     white-space: nowrap;
   }
-
   .controls button:active { transform: scale(0.95); }
+  .controls button:not(:disabled):hover { filter: brightness(1.12); }
+  .btn-start { background: linear-gradient(135deg,#43cea2,#185a9d); color:#fff; box-shadow:0 4px 16px rgba(67,206,162,0.28); }
+  .btn-stop  { background: linear-gradient(135deg,#f7971e,#e74c3c); color:#fff; box-shadow:0 4px 16px rgba(231,76,60,0.28); }
+  .btn-pause { background: linear-gradient(135deg,#a18cd1,#fbc2eb); color:#1a1a2e; box-shadow:0 4px 16px rgba(161,140,209,0.28); }
+  .btn-reset { background: var(--reset-bg); color: var(--reset-color); border: 1px solid var(--reset-border) !important; }
+  .btn-lap   { background: linear-gradient(135deg,#11998e,#38ef7d); color:#0d2010; box-shadow:0 4px 16px rgba(17,153,142,0.28); }
+  .controls button:disabled { opacity: 0.28; cursor: default; pointer-events: none; }
 
-  .btn-start {
-    background: linear-gradient(135deg, #43cea2, #185a9d);
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(67,206,162,0.3);
+  /* ── Lap list ── */
+  .lap-section { margin-bottom: 16px; }
+  .lap-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
   }
-
-  .btn-stop {
-    background: linear-gradient(135deg, #f7971e, #e74c3c);
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(231,76,60,0.3);
+  .lap-title {
+    font-size: 0.68rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--dimmer);
   }
-
-  .btn-pause {
-    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-    color: #1a1a2e;
-    box-shadow: 0 4px 18px rgba(161,140,209,0.3);
+  .lap-clear-btn {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
+    padding: 3px 10px; border-radius: 50px;
+    border: 1px solid var(--input-border);
+    background: var(--preset-bg); color: var(--dimmer);
+    cursor: pointer; transition: background 0.2s, color 0.2s;
   }
-
-  .btn-reset {
-    background: rgba(255,255,255,0.09);
-    color: rgba(255,255,255,0.75);
-    border: 1px solid rgba(255,255,255,0.15) !important;
+  .lap-clear-btn:hover { background: rgba(255,60,60,0.15); color: #ff8888; border-color: rgba(255,60,60,0.3); }
+  .lap-list {
+    max-height: 160px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
-
-  .controls button:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
-  .controls button:not(:disabled):hover { filter: brightness(1.1); }
-
-  /* ── Progress bar (countdown) ── */
-  .progress-wrap {
-    height: 4px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 2px;
-    margin-bottom: 18px;
-    overflow: hidden;
+  .lap-list::-webkit-scrollbar { width: 4px; }
+  .lap-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .lap-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--lap-bg);
+    border: 1px solid var(--lap-border);
+    border-radius: 10px;
+    padding: 7px 12px;
+    animation: lap-in 0.25s ease;
   }
-
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #f7971e, #e74c3c);
-    border-radius: 2px;
-    width: 100%;
-    transition: width 0.5s linear, background 0.5s;
-  }
-
-  .progress-bar.green { background: linear-gradient(90deg, #43cea2, #185a9d); }
+  @keyframes lap-in { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .lap-num { font-size: 0.72rem; color: var(--lap-num); letter-spacing: 0.1em; font-weight: 600; }
+  .lap-time { font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--lap-text); font-weight: 400; }
+  .lap-delta { font-size: 0.75rem; color: var(--dimmer); font-variant-numeric: tabular-nums; }
+  .lap-item.fastest .lap-time { color: #43ea8a; }
+  .lap-item.slowest  .lap-time { color: #f7971e; }
+  body.light .lap-item.fastest .lap-time { color: #1a7a40; }
+  body.light .lap-item.slowest  .lap-time { color: #b85c00; }
 
   /* ── Location ── */
   .location-block { padding-top: 4px; }
-
   .location-flag { margin-bottom: 6px; line-height: 1; }
+  .location-flag img { width: 42px; height: 28px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .location-flag span { font-size: 1.9rem; }
+  .location-city { font-size: clamp(0.86rem,3vw,1.02rem); font-weight: 500; color: var(--text-soft); }
+  .location-coords { font-size: 0.76rem; color: var(--dimmest); letter-spacing: 0.06em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .location-error { font-size: 0.78rem; color: rgba(255,100,100,0.75); margin-top: 6px; }
 
-  .location-flag img {
-    width: 44px;
-    height: 30px;
-    object-fit: cover;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  }
-
-  .location-flag span { font-size: 2rem; }
-
-  .location-city {
-    font-size: clamp(0.88rem, 3vw, 1.05rem);
-    font-weight: 500;
-    color: rgba(255,255,255,0.9);
-  }
-
-  .location-coords {
-    font-size: 0.78rem;
-    color: var(--dimmest);
-    letter-spacing: 0.06em;
-    margin-top: 4px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .location-error {
-    font-size: 0.8rem;
-    color: rgba(255,120,120,0.75);
-    margin-top: 6px;
-  }
-
-  /* ── Done toast ── */
+  /* ── Toast ── */
   .toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    background: linear-gradient(135deg, #f7971e, #e74c3c);
-    color: #fff;
-    padding: 12px 28px;
+    position: fixed; top: 18px; left: 50%;
+    transform: translateX(-50%) translateY(-90px);
+    background: linear-gradient(135deg,#f7971e,#e74c3c);
+    color: #fff; padding: 11px 26px;
     border-radius: 50px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    font-size: 0.92rem; font-weight: 600; letter-spacing: 0.06em;
     box-shadow: 0 8px 24px rgba(231,76,60,0.4);
     transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 999;
-    white-space: nowrap;
+    z-index: 999; white-space: nowrap;
   }
-
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   /* ── Footer ── */
-  footer {
-    margin-top: 24px;
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.22);
-    letter-spacing: 0.05em;
-    text-align: center;
-  }
+  footer { margin-top: 20px; font-size: 0.7rem; color: var(--dimmest); letter-spacing: 0.05em; text-align: center; }
+  footer span { color: var(--dimmer); font-weight: 600; }
 
-  footer span { color: rgba(255,255,255,0.42); font-weight: 600; }
-
-  /* ── Hidden utility ── */
   .hidden { display: none !important; }
 
-  /* ── Small phones (<360px) ── */
   @media (max-width: 360px) {
-    .controls { gap: 6px; }
-    .controls button { font-size: 0.72rem; padding: 8px 10px; }
-    .cd-input { width: 48px; font-size: 1rem; }
-    .cd-sep { font-size: 1.2rem; }
+    .controls button { font-size: 0.7rem; padding: 8px 8px; }
+    .cd-input { width: 46px; font-size: 0.98rem; }
+    .cd-sep { font-size: 1.15rem; }
   }
 </style>
 </head>
 <body>
 
+<div class="flash-overlay" id="flashOverlay"></div>
 <div class="toast" id="toast">⏰ Time's up!</div>
+
+<div class="top-bar">
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light Mode</button>
+</div>
 
 <div class="card">
 
@@ -393,42 +397,30 @@
   <div class="local-time" id="localTime"></div>
   <div class="divider"></div>
 
-  <!-- Mode Toggle -->
+  <!-- Mode toggle -->
   <div class="mode-toggle">
     <button class="mode-btn active-sw" id="modeStopwatch" onclick="setMode('stopwatch')">⏱ Stopwatch</button>
-    <button class="mode-btn" id="modeCountdown" onclick="setMode('countdown')">⏳ Countdown</button>
+    <button class="mode-btn"           id="modeCountdown" onclick="setMode('countdown')">⏳ Countdown</button>
   </div>
 
-  <!-- Label -->
   <div class="label" id="modeLabel">Stopwatch</div>
-
-  <!-- Display -->
   <div class="timer-display" id="timerDisplay">00:00:00</div>
 
-  <!-- Progress bar (countdown only) -->
+  <!-- Progress bar (countdown) -->
   <div class="progress-wrap hidden" id="progressWrap">
     <div class="progress-bar" id="progressBar"></div>
   </div>
 
-  <!-- Countdown input -->
+  <!-- Countdown inputs -->
   <div class="cd-input-row hidden" id="cdInputRow">
-    <div class="cd-group">
-      <label>HH</label>
-      <input class="cd-input" id="cdH" type="number" min="0" max="99" value="0" placeholder="00">
-    </div>
+    <div class="cd-group"><label>HH</label><input class="cd-input" id="cdH" type="number" min="0" max="99" value="0"></div>
     <div class="cd-sep">:</div>
-    <div class="cd-group">
-      <label>MM</label>
-      <input class="cd-input" id="cdM" type="number" min="0" max="59" value="5" placeholder="00">
-    </div>
+    <div class="cd-group"><label>MM</label><input class="cd-input" id="cdM" type="number" min="0" max="59" value="5"></div>
     <div class="cd-sep">:</div>
-    <div class="cd-group">
-      <label>SS</label>
-      <input class="cd-input" id="cdS" type="number" min="0" max="59" value="0" placeholder="00">
-    </div>
+    <div class="cd-group"><label>SS</label><input class="cd-input" id="cdS" type="number" min="0" max="59" value="0"></div>
   </div>
 
-  <!-- Presets (countdown only) -->
+  <!-- Presets -->
   <div class="presets hidden" id="presetsRow">
     <button class="preset-btn" onclick="applyPreset(1,0,0)">1 hr</button>
     <button class="preset-btn" onclick="applyPreset(0,30,0)">30 min</button>
@@ -443,7 +435,17 @@
     <button class="btn-start" id="startBtn" onclick="startTimer()">Start</button>
     <button class="btn-stop"  id="stopBtn"  onclick="stopTimer()"   disabled>Stop</button>
     <button class="btn-pause" id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
-    <button class="btn-reset"              onclick="resetTimer()">Reset</button>
+    <button class="btn-lap"   id="lapBtn"   onclick="recordLap()"   disabled class="hidden">Lap</button>
+    <button class="btn-reset"               onclick="resetTimer()">Reset</button>
+  </div>
+
+  <!-- Lap list (stopwatch only) -->
+  <div class="lap-section hidden" id="lapSection">
+    <div class="lap-header">
+      <span class="lap-title">Laps</span>
+      <button class="lap-clear-btn" onclick="clearLaps()">Clear</button>
+    </div>
+    <div class="lap-list" id="lapList"></div>
   </div>
 
   <div class="divider"></div>
@@ -462,47 +464,101 @@
 
 <script>
   // ── Helpers ─────────────────────────────────────────────
-  const $  = id => document.getElementById(id);
-  const pad = n  => String(n).padStart(2, '0');
+  const $   = id => document.getElementById(id);
+  const pad = n  => String(n).padStart(2,'0');
   const show = id => $(id).classList.remove('hidden');
   const hide = id => $(id).classList.add('hidden');
+
+  // ── Theme ────────────────────────────────────────────────
+  let darkMode = true;
+  function toggleTheme() {
+    darkMode = !darkMode;
+    document.body.classList.toggle('light', !darkMode);
+    $('themeBtn').textContent = darkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
 
   // ── Clock ────────────────────────────────────────────────
   function updateClock() {
     const now = new Date();
-    $('date').textContent = now.toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-    $('localTime').textContent = now.toLocaleTimeString('en-US', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
+    $('date').textContent = now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    $('localTime').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   }
-  updateClock();
-  setInterval(updateClock, 1000);
+  updateClock(); setInterval(updateClock,1000);
+
+  // ── Alarm (Web Audio API) ────────────────────────────────
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function playAlarm() {
+    try {
+      const ctx = getAudioCtx();
+      const sequence = [
+        {freq:880,start:0,   dur:0.15},
+        {freq:880,start:0.18,dur:0.15},
+        {freq:1046,start:0.36,dur:0.22},
+        {freq:880,start:0.65,dur:0.15},
+        {freq:880,start:0.83,dur:0.15},
+        {freq:1046,start:1.01,dur:0.28},
+      ];
+      sequence.forEach(({freq,start,dur}) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + start;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.35, t + 0.015);
+        gain.gain.setValueAtTime(0.35, t + dur - 0.03);
+        gain.gain.linearRampToValueAtTime(0, t + dur);
+        osc.start(t); osc.stop(t + dur + 0.02);
+      });
+    } catch(e) {}
+  }
+
+  // ── Screen flash ─────────────────────────────────────────
+  function triggerFlash() {
+    const el = $('flashOverlay');
+    el.classList.remove('flashing');
+    void el.offsetWidth;
+    el.classList.add('flashing');
+    el.addEventListener('animationend', () => el.classList.remove('flashing'), {once:true});
+  }
+
+  // ── Toast ────────────────────────────────────────────────
+  let toastTmr;
+  function showToast() {
+    clearTimeout(toastTmr);
+    $('toast').classList.add('show');
+    toastTmr = setTimeout(()=>$('toast').classList.remove('show'),3500);
+  }
 
   // ── State ────────────────────────────────────────────────
-  let mode     = 'stopwatch'; // 'stopwatch' | 'countdown'
-  let elapsed  = 0;
-  let cdTotal  = 0;
-  let interval = null;
-  let running  = false;
-  let paused   = false;
+  let mode    = 'stopwatch';
+  let elapsed = 0, cdTotal = 0;
+  let interval = null, running = false, paused = false;
+  let laps = [], lastLapElapsed = 0;
 
   // ── Mode switching ───────────────────────────────────────
   function setMode(m) {
     if (running || paused) resetTimer();
     mode = m;
-    $('modeStopwatch').className = 'mode-btn' + (m === 'stopwatch' ? ' active-sw' : '');
-    $('modeCountdown').className = 'mode-btn' + (m === 'countdown' ? ' active-cd' : '');
-    $('modeLabel').textContent   = m === 'stopwatch' ? 'Stopwatch' : 'Countdown';
-
+    $('modeStopwatch').className = 'mode-btn' + (m==='stopwatch' ? ' active-sw' : '');
+    $('modeCountdown').className = 'mode-btn' + (m==='countdown' ? ' active-cd' : '');
+    $('modeLabel').textContent   = m==='stopwatch' ? 'Stopwatch' : 'Countdown';
     const disp = $('timerDisplay');
-    disp.className = 'timer-display' + (m === 'countdown' ? ' countdown-mode' : '');
+    disp.className = 'timer-display' + (m==='countdown' ? ' countdown-mode' : '');
 
-    if (m === 'stopwatch') {
+    if (m==='stopwatch') {
       hide('cdInputRow'); hide('presetsRow'); hide('progressWrap');
+      show('lapBtn'); // Lap button visible in stopwatch mode
       disp.textContent = '00:00:00';
+      if (laps.length) show('lapSection');
     } else {
+      hide('cdInputRow'); hide('presetsRow'); hide('progressWrap');
+      hide('lapBtn'); hide('lapSection');
       show('cdInputRow'); show('presetsRow'); show('progressWrap');
       syncCountdownDisplay();
     }
@@ -510,169 +566,167 @@
 
   // ── Countdown helpers ────────────────────────────────────
   function getCdSeconds() {
-    const h = Math.min(99, Math.max(0, parseInt($('cdH').value) || 0));
-    const m = Math.min(59, Math.max(0, parseInt($('cdM').value) || 0));
-    const s = Math.min(59, Math.max(0, parseInt($('cdS').value) || 0));
-    return h * 3600 + m * 60 + s;
+    const h = Math.min(99,Math.max(0,parseInt($('cdH').value)||0));
+    const m = Math.min(59,Math.max(0,parseInt($('cdM').value)||0));
+    const s = Math.min(59,Math.max(0,parseInt($('cdS').value)||0));
+    return h*3600+m*60+s;
   }
-
   function syncCountdownDisplay() {
     const secs = getCdSeconds();
     $('timerDisplay').textContent = formatSecs(secs);
-    updateProgress(secs, secs);
+    updateProgress(secs,secs);
   }
-
-  function applyPreset(h, m, s) {
-    $('cdH').value = h; $('cdM').value = m; $('cdS').value = s;
-    syncCountdownDisplay();
-  }
-
-  ['cdH','cdM','cdS'].forEach(id => {
-    $(id).addEventListener('input', syncCountdownDisplay);
-  });
+  function applyPreset(h,m,s) { $('cdH').value=h; $('cdM').value=m; $('cdS').value=s; syncCountdownDisplay(); }
+  ['cdH','cdM','cdS'].forEach(id=>$(id).addEventListener('input',syncCountdownDisplay));
 
   function formatSecs(total) {
-    total = Math.max(0, Math.floor(total));
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
-    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    total = Math.max(0,Math.floor(total));
+    return `${pad(Math.floor(total/3600))}:${pad(Math.floor((total%3600)/60))}:${pad(total%60)}`;
+  }
+  function formatElapsed(ms) {
+    return `${pad(Math.floor(ms/3600000))}:${pad(Math.floor((ms%3600000)/60000))}:${pad(Math.floor((ms%60000)/1000))}`;
+  }
+  function formatElapsedMs(ms) {
+    return `${pad(Math.floor(ms/3600000))}:${pad(Math.floor((ms%3600000)/60000))}:${pad(Math.floor((ms%60000)/1000))}.${String(Math.floor((ms%1000)/10)).padStart(2,'0')}`;
   }
 
   function updateProgress(remaining, total) {
-    if (!total) { $('progressBar').style.width = '100%'; return; }
-    const pct = (remaining / total) * 100;
-    $('progressBar').style.width = pct + '%';
-    if (pct > 30) {
-      $('progressBar').classList.add('green');
-      $('progressBar').classList.remove('red');
-    } else {
-      $('progressBar').classList.remove('green');
-    }
+    if (!total) { $('progressBar').style.width='100%'; return; }
+    const pct = (remaining/total)*100;
+    $('progressBar').style.width = pct+'%';
+    if (pct > 30) { $('progressBar').classList.remove('orange'); }
+    else          { $('progressBar').classList.add('orange'); }
   }
 
-  function formatElapsed(ms) {
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
-    const s = Math.floor((ms % 60000) / 1000);
-    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  // ── Lap recording ────────────────────────────────────────
+  function recordLap() {
+    if (!running) return;
+    const lapTime = elapsed - lastLapElapsed;
+    lastLapElapsed = elapsed;
+    laps.unshift({ n: laps.length+1, total: elapsed, split: lapTime });
+    renderLaps();
+    show('lapSection');
+  }
+
+  function renderLaps() {
+    if (!laps.length) return;
+    const splits = laps.map(l=>l.split);
+    const fastest = Math.min(...splits);
+    const slowest  = splits.length > 1 ? Math.max(...splits) : -1;
+
+    $('lapList').innerHTML = laps.map(l => {
+      let cls = '';
+      if (l.split === fastest && splits.length > 1) cls = 'fastest';
+      else if (l.split === slowest) cls = 'slowest';
+      const delta = l.n===1 ? '' : (l.split > splits[splits.length-1] ? '+' : '') + formatDelta(l.split - splits[splits.length-1]);
+      return `<div class="lap-item ${cls}">
+        <span class="lap-num">LAP ${pad(l.n)}</span>
+        <span class="lap-time">${formatElapsedMs(l.split)}</span>
+        <span class="lap-delta">${formatElapsedMs(l.total)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function formatDelta(ms) {
+    const abs = Math.abs(ms);
+    const s = Math.floor(abs/1000), c = Math.floor((abs%1000)/10);
+    return `${ms<0?'-':'+'}${pad(s)}.${String(c).padStart(2,'0')}`;
+  }
+
+  function clearLaps() {
+    laps = []; lastLapElapsed = 0;
+    $('lapList').innerHTML = '';
+    hide('lapSection');
+  }
+
+  // ── Countdown done ───────────────────────────────────────
+  function onCountdownDone() {
+    clearInterval(interval);
+    running = false;
+    $('timerDisplay').textContent = '00:00:00';
+    $('timerDisplay').className = 'timer-display countdown-mode warning';
+    updateProgress(0, cdTotal);
+    setBtns(false, true, true);
+    showToast();
+    triggerFlash();
+    playAlarm();
+    ['cdH','cdM','cdS'].forEach(id=>$(id).disabled=false);
+    $('presetsRow').style.opacity=''; $('presetsRow').style.pointerEvents='';
+  }
+
+  // ── Tick functions ───────────────────────────────────────
+  function makeSwTick(startRef) {
+    return () => {
+      elapsed = Date.now() - startRef;
+      $('timerDisplay').textContent = formatElapsed(elapsed);
+    };
+  }
+  function makeCdTick(startRef) {
+    return () => {
+      elapsed = Date.now() - startRef;
+      const remaining = cdTotal - elapsed/1000;
+      if (remaining <= 0) { onCountdownDone(); return; }
+      $('timerDisplay').className = 'timer-display countdown-mode' + (remaining<=10?' warning':'');
+      $('timerDisplay').textContent = formatSecs(remaining);
+      updateProgress(remaining, cdTotal);
+    };
   }
 
   // ── Timer controls ───────────────────────────────────────
   function startTimer() {
     if (running) return;
-
-    if (mode === 'countdown') {
-      const secs = getCdSeconds();
-      if (!secs) return;                // nothing set
-      cdTotal  = secs;
-      elapsed  = 0;
+    if (mode==='countdown') {
+      const secs = getCdSeconds(); if (!secs) return;
+      cdTotal = secs; elapsed = 0;
+      ['cdH','cdM','cdS'].forEach(id=>$(id).disabled=true);
+      $('presetsRow').style.opacity='0.38'; $('presetsRow').style.pointerEvents='none';
     }
-
-    running = true; paused = false;
+    running=true; paused=false;
     const startRef = Date.now() - elapsed;
-
-    if (mode === 'stopwatch') {
-      interval = setInterval(() => {
-        elapsed = Date.now() - startRef;
-        $('timerDisplay').textContent = formatElapsed(elapsed);
-      }, 100);
-    } else {
-      // disable inputs while running
-      ['cdH','cdM','cdS'].forEach(id => $(id).disabled = true);
-      $('presetsRow').style.opacity = '0.4';
-      $('presetsRow').style.pointerEvents = 'none';
-
-      interval = setInterval(() => {
-        elapsed = Date.now() - startRef;
-        const remaining = cdTotal - elapsed / 1000;
-        if (remaining <= 0) {
-          clearInterval(interval);
-          running = false;
-          $('timerDisplay').textContent = '00:00:00';
-          $('timerDisplay').classList.add('warning');
-          updateProgress(0, cdTotal);
-          setBtns(false, true, true);
-          showToast();
-          ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
-          $('presetsRow').style.opacity = '';
-          $('presetsRow').style.pointerEvents = '';
-          return;
-        }
-        const pct = remaining <= 10 ? 'warning' : '';
-        $('timerDisplay').className = 'timer-display countdown-mode' + (remaining <= 10 ? ' warning' : '');
-        $('timerDisplay').textContent = formatSecs(remaining);
-        updateProgress(remaining, cdTotal);
-      }, 100);
-    }
-
+    interval = setInterval(mode==='stopwatch' ? makeSwTick(startRef) : makeCdTick(startRef), 80);
     setBtns(true, false, false);
+    if (mode==='stopwatch') { $('lapBtn').disabled=false; }
   }
 
   function stopTimer() {
     if (!running && !paused) return;
-    running = false; paused = false;
+    running=false; paused=false;
     clearInterval(interval);
-    ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
-    if ($('presetsRow')) { $('presetsRow').style.opacity = ''; $('presetsRow').style.pointerEvents = ''; }
+    ['cdH','cdM','cdS'].forEach(id=>$(id).disabled=false);
+    $('presetsRow').style.opacity=''; $('presetsRow').style.pointerEvents='';
     setBtns(false, true, true);
+    $('lapBtn').disabled=true;
   }
 
   function togglePause() {
     if (running) {
-      running = false; paused = true;
+      running=false; paused=true;
       clearInterval(interval);
-      $('pauseBtn').textContent = 'Resume';
+      $('pauseBtn').textContent='Resume';
+      $('lapBtn').disabled=true;
     } else if (paused) {
-      paused = false; running = true;
+      paused=false; running=true;
       const startRef = Date.now() - elapsed;
-
-      if (mode === 'stopwatch') {
-        interval = setInterval(() => {
-          elapsed = Date.now() - startRef;
-          $('timerDisplay').textContent = formatElapsed(elapsed);
-        }, 100);
-      } else {
-        interval = setInterval(() => {
-          elapsed = Date.now() - startRef;
-          const remaining = cdTotal - elapsed / 1000;
-          if (remaining <= 0) {
-            clearInterval(interval);
-            running = false;
-            $('timerDisplay').textContent = '00:00:00';
-            $('timerDisplay').classList.add('warning');
-            updateProgress(0, cdTotal);
-            setBtns(false, true, true);
-            showToast();
-            ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
-            $('presetsRow').style.opacity = '';
-            $('presetsRow').style.pointerEvents = '';
-            return;
-          }
-          $('timerDisplay').className = 'timer-display countdown-mode' + (remaining <= 10 ? ' warning' : '');
-          $('timerDisplay').textContent = formatSecs(remaining);
-          updateProgress(remaining, cdTotal);
-        }, 100);
-      }
-      $('pauseBtn').textContent = 'Pause';
+      interval = setInterval(mode==='stopwatch' ? makeSwTick(startRef) : makeCdTick(startRef), 80);
+      $('pauseBtn').textContent='Pause';
+      if (mode==='stopwatch') $('lapBtn').disabled=false;
     }
   }
 
   function resetTimer() {
-    running = false; paused = false;
-    clearInterval(interval);
-    elapsed = 0;
-    ['cdH','cdM','cdS'].forEach(id => $(id).disabled = false);
-    if ($('presetsRow')) { $('presetsRow').style.opacity = ''; $('presetsRow').style.pointerEvents = ''; }
-    $('timerDisplay').className = 'timer-display' + (mode === 'countdown' ? ' countdown-mode' : '');
-    if (mode === 'stopwatch') {
-      $('timerDisplay').textContent = '00:00:00';
-    } else {
-      syncCountdownDisplay();
-    }
-    updateProgress(1, 1);
+    running=false; paused=false;
+    clearInterval(interval); elapsed=0;
+    ['cdH','cdM','cdS'].forEach(id=>$(id).disabled=false);
+    $('presetsRow').style.opacity=''; $('presetsRow').style.pointerEvents='';
+    $('timerDisplay').className = 'timer-display'+(mode==='countdown'?' countdown-mode':'');
+    $('timerDisplay').textContent = mode==='stopwatch' ? '00:00:00' : (syncCountdownDisplay(),'');
+    if (mode==='countdown') syncCountdownDisplay();
+    updateProgress(1,1);
     setBtns(false, true, true);
-    $('pauseBtn').textContent = 'Pause';
+    $('pauseBtn').textContent='Pause';
+    $('lapBtn').disabled=true;
+    laps=[]; lastLapElapsed=0;
+    $('lapList').innerHTML=''; hide('lapSection');
   }
 
   function setBtns(started, startDis, stopPauseDis) {
@@ -681,69 +735,41 @@
     $('pauseBtn').disabled = stopPauseDis;
   }
 
-  // ── Toast ────────────────────────────────────────────────
-  let toastTimer;
-  function showToast() {
-    clearTimeout(toastTimer);
-    $('toast').classList.add('show');
-    toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3500);
-  }
+  // show lap button initially in stopwatch mode
+  show('lapBtn');
 
   // ── Location ─────────────────────────────────────────────
   function showLocationError(msg) {
-    $('locFlag').innerHTML = '<span>🌐</span>';
-    $('locCity').textContent = 'Location unavailable';
-    $('locError').textContent = msg;
+    $('locFlag').innerHTML='<span>🌐</span>';
+    $('locCity').textContent='Location unavailable';
+    $('locError').textContent=msg;
   }
-
-  function renderLocation(lat, lon, code, city, country) {
-    const latF = parseFloat(lat).toFixed(5);
-    const lonF = parseFloat(lon).toFixed(5);
-    const c = (code || '').toLowerCase();
-    $('locCoords').textContent =
-      `${Math.abs(latF)}°${latF >= 0 ? 'N' : 'S'}  /  ${Math.abs(lonF)}°${lonF >= 0 ? 'E' : 'W'}`;
-    $('locFlag').innerHTML = c
-      ? `<img src="https://flagcdn.com/w80/${c}.png" alt="${country}" title="${country}">`
-      : '<span>🌐</span>';
-    $('locCity').textContent = `${city || 'Unknown city'}, ${country || 'Unknown country'}`;
+  function renderLocation(lat,lon,code,city,country) {
+    const lf=parseFloat(lat).toFixed(5), lo=parseFloat(lon).toFixed(5);
+    const c=(code||'').toLowerCase();
+    $('locCoords').textContent=`${Math.abs(lf)}°${lf>=0?'N':'S'}  /  ${Math.abs(lo)}°${lo>=0?'E':'W'}`;
+    $('locFlag').innerHTML = c ? `<img src="https://flagcdn.com/w80/${c}.png" alt="${country}" title="${country}">` : '<span>🌐</span>';
+    $('locCity').textContent=`${city||'Unknown city'}, ${country||'Unknown country'}`;
   }
-
-  async function reverseGeocode(lat, lon) {
-    const r = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    const d = await r.json();
-    const a = d.address || {};
-    return {
-      city: a.city || a.town || a.village || a.county || 'Unknown city',
-      country: a.country || 'Unknown country',
-      code: a.country_code || ''
-    };
+  async function reverseGeocode(lat,lon) {
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,{headers:{'Accept-Language':'en'}});
+    const d=await r.json(); const a=d.address||{};
+    return {city:a.city||a.town||a.village||a.county||'Unknown city',country:a.country||'Unknown country',code:a.country_code||''};
   }
-
   async function ipFallback() {
-    const services = [
-      async () => { const r=await fetch('https://ipapi.co/json/'); const d=await r.json(); if(d.error) throw 0; return {lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country_name}; },
-      async () => { const r=await fetch('https://ip-api.com/json/?fields=status,city,country,countryCode,lat,lon'); const d=await r.json(); if(d.status!=='success') throw 0; return {lat:d.lat,lon:d.lon,code:d.countryCode,city:d.city,country:d.country}; },
-      async () => { const r=await fetch('https://freeipapi.com/api/json'); const d=await r.json(); return {lat:d.latitude,lon:d.longitude,code:d.countryCode,city:d.cityName,country:d.countryName}; },
-      async () => { const r=await fetch('https://ipwho.is/'); const d=await r.json(); if(!d.success) throw 0; return {lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country}; }
+    const svcs=[
+      async()=>{const r=await fetch('https://ipapi.co/json/');const d=await r.json();if(d.error)throw 0;return{lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country_name};},
+      async()=>{const r=await fetch('https://ip-api.com/json/?fields=status,city,country,countryCode,lat,lon');const d=await r.json();if(d.status!=='success')throw 0;return{lat:d.lat,lon:d.lon,code:d.countryCode,city:d.city,country:d.country};},
+      async()=>{const r=await fetch('https://freeipapi.com/api/json');const d=await r.json();return{lat:d.latitude,lon:d.longitude,code:d.countryCode,city:d.cityName,country:d.countryName};},
+      async()=>{const r=await fetch('https://ipwho.is/');const d=await r.json();if(!d.success)throw 0;return{lat:d.latitude,lon:d.longitude,code:d.country_code,city:d.city,country:d.country};}
     ];
-    for (const svc of services) {
-      try { const {lat,lon,code,city,country}=await svc(); renderLocation(lat,lon,code,city,country); return; } catch {}
-    }
+    for(const s of svcs){try{const{lat,lon,code,city,country}=await s();renderLocation(lat,lon,code,city,country);return;}catch{}}
     showLocationError('Location could not be determined.');
   }
-
-  if (navigator.geolocation) {
+  if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const { latitude: lat, longitude: lon } = pos.coords;
-        try { const {city,country,code}=await reverseGeocode(lat,lon); renderLocation(lat,lon,code,city,country); }
-        catch { renderLocation(lat,lon,'','Unknown city','Unknown country'); }
-      },
-      () => ipFallback(),
-      { timeout: 8000 }
+      async pos=>{const{latitude:lat,longitude:lon}=pos.coords;try{const{city,country,code}=await reverseGeocode(lat,lon);renderLocation(lat,lon,code,city,country);}catch{renderLocation(lat,lon,'','Unknown city','Unknown country');}},
+      ()=>ipFallback(),{timeout:8000}
     );
   } else { ipFallback(); }
 </script>
